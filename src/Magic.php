@@ -251,8 +251,15 @@ final class Magic
             self::$can_use_igbinary = \function_exists('igbinary_serialize');
             self::$isIpcWorker = \defined('MADELINE_WORKER_TYPE') ? MADELINE_WORKER_TYPE === 'madeline-ipc' : false;
             // Important, obtain root relative to caller script
-            $backtrace = debug_backtrace(0);
-            self::$script_cwd = self::$cwd = \dirname(end($backtrace)['file']);
+            $backtrace = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+            foreach (array_reverse($backtrace) as $trace) {
+                if (isset($trace['file']) && $trace['file']) {
+                    self::$script_cwd = self::$cwd = \dirname($trace['file']);
+                    break;
+                }
+            }
+
+//            self::$script_cwd = self::$cwd = \dirname(end($backtrace)['file']);
             if (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
                 try {
                     error_reporting(E_ALL);
